@@ -1,0 +1,16 @@
+{# Restore the fixed overlay policies from bgp.conf after drain_overlay.j2.
+   Delete the drain policies before restoring the original expressions. #}
+{# Undrain OTT gateways #}
+{% for session in bgp_sessions.values() if session.role == "leaf_remote_gw" %}
+delete protocols bgp group evpn-gw neighbor {{ session.dest_ip }} import
+delete protocols bgp group evpn-gw neighbor {{ session.dest_ip }} export
+set protocols bgp group evpn-gw neighbor {{ session.dest_ip }} import ( EVPN_GW_IN )
+set protocols bgp group evpn-gw neighbor {{ session.dest_ip }} export ( EVPN_GW_OUT && EVPN_EXPORT )
+{% endfor %}
+
+{# Undrain other leaf: the original configuration has no neighbor import policy. #}
+{% for session in bgp_sessions.values() if session.role == "leaf_evpn" %}
+delete protocols bgp group l3clos-l-evpn neighbor {{ session.dest_ip }} import
+delete protocols bgp group l3clos-l-evpn neighbor {{ session.dest_ip }} export
+set protocols bgp group l3clos-l-evpn neighbor {{ session.dest_ip }} export ( EVPN_EXPORT )
+{% endfor %}

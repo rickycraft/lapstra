@@ -1,0 +1,4 @@
+{# Expects the decoded configuration context, with its interface dictionary. #}
+{% for i in interface.values() if i["role"] == "l2edge" and not i["is_port_channel"] and not i["is_subinterface"] %}
+set interfaces {{ i["intfName"] }} disable
+{% endfor %}

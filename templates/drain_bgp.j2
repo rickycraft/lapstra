@@ -1,0 +1,8 @@
+{# Expects the decoded configuration context, with its bgp_sessions dictionary.
+   Delete existing policy lists before setting Drain as the sole policy. #}
+{% for peer in bgp_sessions.values() if peer["vrf_name"] != "default" %}
+delete routing-instances {{ peer["vrf_name"] }} protocols bgp group l3rtr neighbor {{ peer["dest_ip"] }} import
+delete routing-instances {{ peer["vrf_name"] }} protocols bgp group l3rtr neighbor {{ peer["dest_ip"] }} export
+set routing-instances {{ peer["vrf_name"] }} protocols bgp group l3rtr neighbor {{ peer["dest_ip"] }} import Drain
+set routing-instances {{ peer["vrf_name"] }} protocols bgp group l3rtr neighbor {{ peer["dest_ip"] }} export Drain
+{% endfor %}

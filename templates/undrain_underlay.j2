@@ -1,0 +1,29 @@
+{# Restore default-VRF underlay imports/exports after drain_underlay.j2.
+   Read original inbound/outbound route maps from the context.
+   Empty inbound route maps leave no neighbor import override. Mesh peers without
+   a route map use the generated BGP-AOS-Policy export from bgp.conf. #}
+{# Undrain leaf mesh peers #}
+{% for session in bgp_sessions.values() if session.vrf_name == "default" and session.role == "leaf_leaf_mesh" %}
+delete protocols bgp group l3clos-l neighbor {{ session.dest_ip }} import
+delete protocols bgp group l3clos-l neighbor {{ session.dest_ip }} export
+{% if session.route_map_in %}
+set protocols bgp group l3clos-l neighbor {{ session.dest_ip }} import ( {{ session.route_map_in }} )
+{% endif %}
+{% if session.route_map_out %}
+set protocols bgp group l3clos-l neighbor {{ session.dest_ip }} export ( {{ session.route_map_out }} )
+{% else %}
+set protocols bgp group l3clos-l neighbor {{ session.dest_ip }} export ( BGP-AOS-Policy )
+{% endif %}
+{% endfor %}
+
+{# Undrain router peers; an empty route map leaves no neighbor export override. #}
+{% for session in bgp_sessions.values() if session.vrf_name == "default" and session.role == "leaf_router" %}
+delete protocols bgp group l3rtr neighbor {{ session.dest_ip }} import
+delete protocols bgp group l3rtr neighbor {{ session.dest_ip }} export
+{% if session.route_map_in %}
+set protocols bgp group l3rtr neighbor {{ session.dest_ip }} import ( {{ session.route_map_in }} )
+{% endif %}
+{% if session.route_map_out %}
+set protocols bgp group l3rtr neighbor {{ session.dest_ip }} export ( {{ session.route_map_out }} )
+{% endif %}
+{% endfor %}

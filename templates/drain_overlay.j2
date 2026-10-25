@@ -1,0 +1,14 @@
+{# Drain OTT gateways #}
+{% for session in bgp_sessions.values() if session.role == "leaf_remote_gw" %}
+delete protocols bgp group evpn-gw neighbor {{ session.dest_ip }} import
+delete protocols bgp group evpn-gw neighbor {{ session.dest_ip }} export
+set protocols bgp group evpn-gw neighbor {{ session.dest_ip }} import Drain
+set protocols bgp group evpn-gw neighbor {{ session.dest_ip }} export Drain
+{% endfor %}
+
+{# Drain other leaf #}
+{% for session in bgp_sessions.values() if session.role == "leaf_evpn" %}
+delete protocols bgp group l3clos-l-evpn neighbor {{ session.dest_ip }} export
+set protocols bgp group l3clos-l-evpn neighbor {{ session.dest_ip }} import Drain
+set protocols bgp group l3clos-l-evpn neighbor {{ session.dest_ip }} export Drain
+{% endfor %}

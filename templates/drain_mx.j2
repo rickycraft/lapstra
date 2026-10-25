@@ -1,0 +1,7 @@
+{% for session in bgp_sessions.values() if session.dest_asn == '64999' and session.vrf_name != 'default' %}
+delete routing-instances {{ session.vrf_name }} protocols bgp group l3rtr neighbor {{ session.dest_ip }} import
+delete routing-instances {{ session.vrf_name }} protocols bgp group l3rtr neighbor {{ session.dest_ip }} export
+insert routing-instances {{ session.vrf_name }} protocols bgp group l3rtr neighbor {{ session.dest_ip }} import Drain
+insert routing-instances {{ session.vrf_name }} protocols bgp group l3rtr neighbor {{ session.dest_ip }} export Drain
+{% endfor %}
+

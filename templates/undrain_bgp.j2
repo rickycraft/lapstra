@@ -1,0 +1,14 @@
+{# Restore non-default VRF neighbors after drain_bgp.j2.
+   Read original import/export route maps from the configuration context.
+   Empty route maps leave no neighbor policy override.
+   Keep the shared Drain policy for other peers that may still be drained. #}
+{% for peer in bgp_sessions.values() if peer["vrf_name"] != "default" %}
+delete routing-instances {{ peer["vrf_name"] }} protocols bgp group l3rtr neighbor {{ peer["dest_ip"] }} import
+delete routing-instances {{ peer["vrf_name"] }} protocols bgp group l3rtr neighbor {{ peer["dest_ip"] }} export
+{% if peer["route_map_in"] %}
+set routing-instances {{ peer["vrf_name"] }} protocols bgp group l3rtr neighbor {{ peer["dest_ip"] }} import ( {{ peer["route_map_in"] }} )
+{% endif %}
+{% if peer["route_map_out"] %}
+set routing-instances {{ peer["vrf_name"] }} protocols bgp group l3rtr neighbor {{ peer["dest_ip"] }} export ( {{ peer["route_map_out"] }} )
+{% endif %}
+{% endfor %}

@@ -1,0 +1,17 @@
+{# Drain default-VRF underlay peers. Drain must already exist.
+   Replace existing import/export lists so Drain is the sole policy.
+   Group mapping: leaf_leaf_mesh -> l3clos-l, leaf_router -> l3rtr. #}
+{# Drain leaf mesh peers #}
+{% for session in bgp_sessions.values() if session.vrf_name == "default" and session.role == "leaf_leaf_mesh" %}
+delete protocols bgp group l3clos-l neighbor {{ session.dest_ip }} export
+set protocols bgp group l3clos-l neighbor {{ session.dest_ip }} import Drain
+set protocols bgp group l3clos-l neighbor {{ session.dest_ip }} export Drain
+{% endfor %}
+
+{# Drain router peers #}
+{% for session in bgp_sessions.values() if session.vrf_name == "default" and session.role == "leaf_router" %}
+delete protocols bgp group l3rtr neighbor {{ session.dest_ip }} import
+delete protocols bgp group l3rtr neighbor {{ session.dest_ip }} export
+set protocols bgp group l3rtr neighbor {{ session.dest_ip }} import Drain
+set protocols bgp group l3rtr neighbor {{ session.dest_ip }} export Drain
+{% endfor %}
