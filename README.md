@@ -2,6 +2,16 @@
 
 Lapstra is a Go command-line tool for managing Juniper Apstra blueprints. It provides an interactive terminal menu and dedicated operations for virtual networks, connectivity templates, routing zones, configuration deployment, and CSV workflows.
 
+## Build
+
+Build a statically linked binary locally with:
+
+```sh
+CGO_ENABLED=0 go build -trimpath -o lapstra .
+```
+
+The GitHub Actions `Build` workflow builds and verifies a statically linked Linux amd64 binary on pushes, pull requests, and manual runs. Download `lapstra-linux-amd64` from the workflow run's artifacts, extract it, and run `chmod +x lapstra` before use.
+
 ## Motivation
 
 Managing the same network services across multiple blueprints involves repeated configuration steps. Lapstra brings these tasks into a single workflow, with shared VLAN-to-VNI mapping across datacenter pairs and CSV input for bulk changes.

@@ -1,0 +1,29 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CGO_ENABLED: '0'
+      GOOS: linux
+      GOARCH: amd64
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Build static binary
+        run: go build -trimpath -o lapstra .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: lapstra-linux-amd64
+          path: lapstra
+          if-no-files-found: error
