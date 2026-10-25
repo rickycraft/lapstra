@@ -17,13 +17,13 @@ func (l *LapstraCmd) MapVidVni(idx int, vid uint16) (uint32, error) {
 	// Check if vid should be stretched
 	location := l.locations[idx]
 	if l.IsStretch() {
-		// Return same vid for FE to RA
-		if location == FE {
-			location = RA
+		// Share the VNI pool between DC1 and DC2.
+		if location == DC2 {
+			location = DC1
 		}
-		// Return same vid for PR to MO
-		if location == PR {
-			location = MO
+		// Share the VNI pool between DC3 and DC4.
+		if location == DC4 {
+			location = DC3
 		}
 	}
 

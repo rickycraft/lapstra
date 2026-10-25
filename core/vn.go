@@ -223,5 +223,5 @@ func CreateVnL3WithBinding(ctx context.Context, client *apstra.TwoStageL3ClosCli
 }
 
 func MapLocationVnPoolName(location string) string {
-	return fmt.Sprintf("DC-%s-VNI-POOL", location)
+	return fmt.Sprintf("%s-VNI-POOL", location)
 }

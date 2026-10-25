@@ -72,9 +72,9 @@ func parseVniMergeRow(record []string) (vniMergeRow, error) {
 
 	site := cmd.DcToLocation(record[1])
 	switch site {
-	case cmd.RA, cmd.FE, cmd.MO, cmd.PR:
+	case cmd.DC1, cmd.DC2, cmd.DC3, cmd.DC4:
 	default:
-		return vniMergeRow{}, fmt.Errorf("invalid site '%s' should be one of: RA FE MO PR", record[1])
+		return vniMergeRow{}, fmt.Errorf("invalid site '%s' should be one of: DC1 DC2 DC3 DC4", record[1])
 	}
 
 	removeMx, err := strconv.ParseBool(record[2])

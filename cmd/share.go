@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/IBM/fp-go/array"
@@ -19,26 +18,26 @@ type Location int
 const (
 	DatacenterPair Location = iota
 	Custom
-	RA
-	FE
-	MO
-	PR
+	DC1
+	DC2
+	DC3
+	DC4
 )
 
 func (l Location) String() string {
-	return [...]string{"Datacenter Pair", "Custom", "RA", "FE", "MO", "PR"}[l]
+	return [...]string{"Datacenter Pair", "Custom", "DC1", "DC2", "DC3", "DC4"}[l]
 }
 
 func DcToLocation(dc string) Location {
 	switch dc {
-	case "RA":
-		return RA
-	case "FE":
-		return FE
-	case "MO":
-		return MO
-	case "PR":
-		return PR
+	case "DC1":
+		return DC1
+	case "DC2":
+		return DC2
+	case "DC3":
+		return DC3
+	case "DC4":
+		return DC4
 	default:
 		return Custom
 	}
@@ -55,7 +54,7 @@ type LapstraCmd struct {
 }
 
 func labelToLocation(label string) Location {
-	pattern := `(?:^|-)DC(\S{2})-C[0-9].*SPINE$`
+	pattern := `(?:^|-)(DC[1-4])-C[0-9].*SPINE$`
 	re := regexp.MustCompile(pattern)
 	matches := re.FindStringSubmatch(label)
 
@@ -81,9 +80,9 @@ func (l *LapstraCmd) Connect(client *apstra.Client, blueprints []apstra.Blueprin
 			return err
 		}
 		ids = _ids
-	case RA, FE, MO, PR:
+	case DC1, DC2, DC3, DC4:
 		// Select the blueprints for the selected location
-		_ids := array.Filter(func(b apstra.BlueprintStatus) bool { return strings.Contains(b.Label, location.String()) })(blueprints)
+		_ids := array.Filter(func(b apstra.BlueprintStatus) bool { return labelToLocation(b.Label) == location })(blueprints)
 		ids = array.Map(func(b apstra.BlueprintStatus) apstra.ObjectId { return b.Id })(_ids)
 	}
 

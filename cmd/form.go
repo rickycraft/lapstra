@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/IBM/fp-go/array"
 	"github.com/Juniper/apstra-go-sdk/apstra"
@@ -45,22 +44,20 @@ func SelectBlueprint(apiEndpoint string, username string, password string, inter
 		return nil, err
 	}
 
-	checkRaFe := func(b apstra.BlueprintStatus) bool {
-		return strings.Contains(b.Label, "RA") || strings.Contains(b.Label, "FE")
-	}
-	isRAFE := array.Any(checkRaFe)(blueprints)
+	isDC1DC2 := array.Any(func(b apstra.BlueprintStatus) bool {
+		location := labelToLocation(b.Label)
+		return location == DC1 || location == DC2
+	})(blueprints)
 
 	// Make the user choose location
 	locationOpts := []huh.Option[Location]{
 		{Value: DatacenterPair, Key: "ALL"},
 		{Value: Custom, Key: "Custom"},
 	}
-	if isRAFE {
-		locationOpts = append(locationOpts, huh.Option[Location]{Value: RA, Key: "RA"})
-		locationOpts = append(locationOpts, huh.Option[Location]{Value: FE, Key: "FE"})
+	if isDC1DC2 {
+		locationOpts = append(locationOpts, huh.NewOption("DC1", DC1), huh.NewOption("DC2", DC2))
 	} else {
-		locationOpts = append(locationOpts, huh.Option[Location]{Value: MO, Key: "MO"})
-		locationOpts = append(locationOpts, huh.Option[Location]{Value: PR, Key: "PR"})
+		locationOpts = append(locationOpts, huh.NewOption("DC3", DC3), huh.NewOption("DC4", DC4))
 	}
 	// If location is Custom, then prompt for the blueprint name
 	location := DatacenterPair // Reset default value
